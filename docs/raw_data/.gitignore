@@ -1,0 +1,17 @@
+# Raw data is local-only — not committed to the repository.
+# Drop files here and run /lumen ingest to process them.
+*
+!.gitignore
+!README.md
+!transcripts/
+!emails/
+!screenshots/
+!documents/
+transcripts/*
+!transcripts/.gitkeep
+emails/*
+!emails/.gitkeep
+screenshots/*
+!screenshots/.gitkeep
+documents/*
+!documents/.gitkeep

@@ -1,0 +1,28 @@
+{
+  "name": "oh-my-tokens",
+  "version": "0.1.0",
+  "description": "TUI for Claude Code token usage and cost",
+  "type": "module",
+  "bin": {
+    "oh-my-tokens": "./dist/cli.js"
+  },
+  "scripts": {
+    "build": "tsc",
+    "start": "tsx src/cli.tsx",
+    "dev": "tsx watch src/cli.tsx"
+  },
+  "dependencies": {
+    "ink": "^5.0.1",
+    "ink-tab": "^5.0.0",
+    "react": "^18.3.1"
+  },
+  "devDependencies": {
+    "@types/node": "^25.6.0",
+    "@types/react": "^18.3.3",
+    "tsx": "^4.19.0",
+    "typescript": "^5.5.4"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}
