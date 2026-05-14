@@ -78,7 +78,7 @@ If a session does not produce a `.jsonl` file under one of the scanned roots, it
 ### Run from source
 
 ```bash
-git clone https://github.com/<your-user>/oh-my-tokens.git
+git clone https://github.com/shev-pro/oh-my-tokens.git
 cd oh-my-tokens
 npm install
 npm start
@@ -89,7 +89,7 @@ npm start
 ### Global install (link)
 
 ```bash
-git clone https://github.com/<your-user>/oh-my-tokens.git
+git clone https://github.com/shev-pro/oh-my-tokens.git
 cd oh-my-tokens
 npm install
 npm run build
