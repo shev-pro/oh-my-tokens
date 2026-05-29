@@ -128,7 +128,7 @@ On launch the tool prints `Scanning Claude logs...` to stderr, then opens the TU
 4. **Extract tokens** — `input_tokens`, `cache_read_input_tokens`, `cache_creation_input_tokens`, `output_tokens`. Drop the row if all four are zero.
 5. **Bucket by UTC day** — `YYYY-MM-DD` derived from the ISO `timestamp`.
 6. **Dedup** — within a file: last write wins on `messageId:requestId`. Across files: prefer non-sidechain, then parent path over `subagents/`, then lexicographic path order.
-7. **Normalize the model name** — strip `anthropic.` prefix, drop Bedrock `-vN:M` suffix, drop dated `-YYYYMMDD` suffix only if the base is a known model.
+7. **Normalize the model name** — strip `anthropic.` prefix, drop Bedrock `-vN:M` suffix, drop the `[Nm]` context-window marker (e.g. `claude-opus-4-8[1m]`), drop dated `-YYYYMMDD` suffix only if the base is a known model.
 8. **Apply pricing** — per-bucket multiplication; Sonnet 4.x uses a 200k tier per bucket.
 9. **Render** — Ink/React TUI with three tabs and a stacked histogram per active window.
 

@@ -41,7 +41,8 @@ graph TD
 1. `anthropic.` prefix (Bedrock).
 2. Vertex/Bedrock leading namespace: if string contains `claude-` and a `.`, take everything after the last `.` when the tail starts with `claude-` (handles `us.anthropic.claude-...`).
 3. Bedrock version suffix matching `-vN:M` at end (e.g. `-v1:0`).
-4. Dated suffix `-YYYYMMDD` at end **only** if the resulting base model exists in the price table; otherwise keep the dated form.
+4. Context-window marker `[Nm]` at end (e.g. `claude-opus-4-8[1m]` → `claude-opus-4-8`) — the 1M-context variant shares the base model's rate.
+5. Dated suffix `-YYYYMMDD` at end **only** if the resulting base model exists in the price table; otherwise keep the dated form.
 
 Result: a key directly looked up in `CLAUDE_PRICING`. Unknown keys → cost `null`.
 

@@ -18,6 +18,7 @@ export const CLAUDE_PRICING: Record<string, Rate> = {
   "claude-opus-4-6-20260205":  { in: 5e-6, out: 2.5e-5, cc: 6.25e-6, cr: 5e-7 },
   "claude-opus-4-6":           { in: 5e-6, out: 2.5e-5, cc: 6.25e-6, cr: 5e-7 },
   "claude-opus-4-7":           { in: 5e-6, out: 2.5e-5, cc: 6.25e-6, cr: 5e-7 },
+  "claude-opus-4-8":           { in: 5e-6, out: 2.5e-5, cc: 6.25e-6, cr: 5e-7 },
   "claude-opus-4-1":           { in: 1.5e-5, out: 7.5e-5, cc: 1.875e-5, cr: 1.5e-6 },
   "claude-opus-4-20250514":    { in: 1.5e-5, out: 7.5e-5, cc: 1.875e-5, cr: 1.5e-6 },
   "claude-sonnet-4-5": {
@@ -44,6 +45,7 @@ export const CLAUDE_PRICING: Record<string, Rate> = {
 
 const DATED_SUFFIX = /-\d{8}$/;
 const VERTEX_VRANGE = /-v\d+:\d+$/;
+const CONTEXT_MARKER = /\[\d+m\]$/;
 
 export function normalizeClaudeModel(raw: string): string {
   let s = raw.trim();
@@ -53,6 +55,7 @@ export function normalizeClaudeModel(raw: string): string {
     if (tail.startsWith("claude-")) s = tail;
   }
   s = s.replace(VERTEX_VRANGE, "");
+  s = s.replace(CONTEXT_MARKER, "");
   const m = s.match(DATED_SUFFIX);
   if (m) {
     const base = s.slice(0, m.index!);
