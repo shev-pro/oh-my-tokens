@@ -13,11 +13,13 @@ export type Row = {
   inp: number;
   cacheRead: number;
   cacheCreate: number;
+  cacheCreate1h: number;
   out: number;
+  timestampMs: number;
   cost: number | null;
 };
 
-export type Bucket = { input: number; cache_read: number; cache_create: number; output: number; cost: number };
+export type Bucket = { input: number; cache_read: number; cache_create: number; output: number; total: number; cost: number };
 export type Days = Record<string, Record<string, Bucket>>;
 
 export function claudeRoots(): string[] {
@@ -90,10 +92,17 @@ export function parseFile(path: string): Row[] {
               const u = msg.usage;
               const inp = Math.max(0, Number(u.input_tokens) || 0);
               const cc = Math.max(0, Number(u.cache_creation_input_tokens) || 0);
+              // 1h TTL cache creation tokens (nested under usage.cache_creation)
+              const cc1hRaw = u.cache_creation && typeof u.cache_creation === "object"
+                ? Math.max(0, Number(u.cache_creation.ephemeral_1h_input_tokens) || 0)
+                : 0;
+              const cc1h = Math.min(cc1hRaw, cc);
               const cr = Math.max(0, Number(u.cache_read_input_tokens) || 0);
               const out = Math.max(0, Number(u.output_tokens) || 0);
               if (inp || cc || cr || out) {
-                const cost = claudeCostUsd(msg.model, inp, cr, cc, out);
+                const ts = new Date(obj.timestamp).getTime();
+                const timestampMs = isNaN(ts) ? 0 : ts;
+                const cost = claudeCostUsd(msg.model, inp, cr, cc, out, cc1h, timestampMs);
                 const mid = typeof msg.id === "string" ? msg.id : null;
                 const rid = typeof obj.requestId === "string" ? obj.requestId : null;
                 const row: Row = {
@@ -103,7 +112,8 @@ export function parseFile(path: string): Row[] {
                   requestId: rid,
                   isSidechain: !!obj.isSidechain,
                   pathRole: role,
-                  inp, cacheRead: cr, cacheCreate: cc, out,
+                  inp, cacheRead: cr, cacheCreate: cc, cacheCreate1h: cc1h, out,
+                  timestampMs,
                   cost,
                 };
                 if (mid && rid) keyed.set(`${mid}:${rid}`, row);
@@ -155,11 +165,12 @@ export function aggregate(rows: Array<{ path: string; row: Row }>): Days {
   const days: Days = {};
   const add = (row: Row) => {
     const day = (days[row.dayKey] ??= {});
-    const b = (day[row.model] ??= { input: 0, cache_read: 0, cache_create: 0, output: 0, cost: 0 });
+    const b = (day[row.model] ??= { input: 0, cache_read: 0, cache_create: 0, output: 0, total: 0, cost: 0 });
     b.input += row.inp;
     b.cache_read += row.cacheRead;
     b.cache_create += row.cacheCreate;
     b.output += row.out;
+    b.total += row.inp + row.cacheRead + row.cacheCreate + row.out;
     b.cost += row.cost ?? 0;
   };
   for (const { row } of winners.values()) add(row);
