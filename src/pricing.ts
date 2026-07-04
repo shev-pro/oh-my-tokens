@@ -24,6 +24,8 @@ export const CLAUDE_PRICING: Record<string, Rate> = {
   },
   // Flat pricing since ~2026-03-12; historical tiered rates in HISTORICAL_PRICING
   "claude-sonnet-4-6":         { in: 3e-6, out: 1.5e-5, cc: 3.75e-6, cr: 3e-7 },
+  // Standard rates; introductory rates (through 2026-08-31) in INTRO_PRICING
+  "claude-sonnet-5":           { in: 3e-6, out: 1.5e-5, cc: 3.75e-6, cr: 3e-7 },
   "claude-sonnet-4-20250514": {
     in: 3e-6, out: 1.5e-5, cc: 3.75e-6, cr: 3e-7,
     th: 200_000, in_hi: 6e-6, out_hi: 2.25e-5, cc_hi: 7.5e-6, cr_hi: 6e-7,
@@ -33,6 +35,15 @@ export const CLAUDE_PRICING: Record<string, Rate> = {
 
 // Before this timestamp claude-sonnet-4-6 and claude-opus-4-6 had long-context tiered pricing
 const LONG_CONTEXT_CUTOFF_MS = 1_773_360_000_000;
+
+// Introductory pricing applies to requests before this timestamp (2026-09-01 UTC);
+// standard rates in CLAUDE_PRICING apply from 2026-08-31 onward.
+const INTRO_CUTOFF_MS = 1_788_220_800_000;
+
+// Promotional launch pricing keyed by model; overrides CLAUDE_PRICING before INTRO_CUTOFF_MS
+const INTRO_PRICING: Record<string, Rate> = {
+  "claude-sonnet-5": { in: 2e-6, out: 1e-5, cc: 2.5e-6, cr: 2e-7 },
+};
 
 // Historical pricing for models that switched to flat rates in March 2026
 const HISTORICAL_PRICING: Record<string, Rate> = {
@@ -86,6 +97,12 @@ export function claudeCostUsd(
   if (timestampMs !== undefined && timestampMs < LONG_CONTEXT_CUTOFF_MS) {
     const hp = HISTORICAL_PRICING[key];
     if (hp) p = hp;
+  }
+
+  // Apply introductory (launch promo) pricing for requests before the intro cutoff
+  if (timestampMs !== undefined && timestampMs < INTRO_CUTOFF_MS) {
+    const ip = INTRO_PRICING[key];
+    if (ip) p = ip;
   }
 
   // All-or-nothing long-context threshold: if total input > threshold, all tokens

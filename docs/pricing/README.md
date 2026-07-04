@@ -59,6 +59,15 @@ tier(t, base, hi, threshold):
 
 If `threshold` or `hi` is undefined, plain `t * base`.
 
+## Time-based Pricing
+
+Some models change rates over time. `claudeCostUsd()` accepts an optional `timestampMs` and swaps the rate table accordingly:
+
+- **`HISTORICAL_PRICING`** — for requests **before** `LONG_CONTEXT_CUTOFF_MS` (~2026-03-13), `claude-sonnet-4-6` and `claude-opus-4-6` used long-context tiered rates. After the cutoff they bill flat.
+- **`INTRO_PRICING`** — promotional launch rates applied **before** `INTRO_CUTOFF_MS` (2026-09-01 UTC). `claude-sonnet-5` bills at the introductory $2/$10 per MTok through 2026-08-31, then reverts to the standard $3/$15 in `CLAUDE_PRICING`.
+
+Both overrides key by canonical model name and only apply when a `timestampMs` is supplied; without one, the standard `CLAUDE_PRICING` rate is used.
+
 ## Adding a New Model
 
 When Anthropic ships a new model:
@@ -66,6 +75,7 @@ When Anthropic ships a new model:
 1. Add the bare entry (e.g. `"claude-foo-1"`).
 2. Add any dated variants you care about (e.g. `"claude-foo-1-20260101"`).
 3. If tiered, set `th`, `in_hi`, `out_hi`, `cc_hi`, `cr_hi`.
+4. If it has launch/promo pricing, add the standard rate to `CLAUDE_PRICING` and the promo rate to `INTRO_PRICING` (see [Time-based Pricing](#time-based-pricing)).
 
 `normalizeClaudeModel()` strips the dated suffix only when the base form is already a known key — so adding the bare entry is enough for future-dated builds of the same model.
 
